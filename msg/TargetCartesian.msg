@@ -1,0 +1,11 @@
+Header header
+float32 distance_x
+float32 velocity_x
+float32 velocity_y
+float32 distance_y
+uint8 msg_counter
+uint8 sensor_nr
+uint8 target_format_type
+uint8 object_type
+uint8 quality
+uint8 track_id
