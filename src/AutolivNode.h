@@ -22,6 +22,7 @@ public:
 private:
 
     // functions to receive and process the can messages
+    int getTargetType(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void recvCAN(const dataspeed_can_msgs::CamMessagesStamped::ConstPtr &msg);
     void procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
