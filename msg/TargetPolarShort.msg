@@ -2,7 +2,7 @@ Header header
 float32 range
 float32 velocity
 float32 bearing
-int8 quality
+uint8 quality
 uint8 track_id
 uint8 msg_counter
 uint8 sensor_nr
