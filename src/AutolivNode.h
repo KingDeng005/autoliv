@@ -13,23 +13,24 @@
 #include <TargetPolarLong.h>
 #include <TargetPolarShort.h>
 
-class AutolivNode
-{
+namespace octopus{
+class AutolivNode{
 public:
 	AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh);
 	~AutolivNode();
 
 private:
+
 	// functions to receive and process the can messages
 	void recvCAN(const dataspeed_can_msgs::CamMessagesStamped::ConstPtr &msg);
-	void procTargetPolarShort(const TargetPolarShort::ConstPtr &msg);
-	void procRawPolarShort(const RawPolarShort::ConstPtr &msg);
-	void procTargetCartesian(const TargetCartesian::ConstPtr &msg);
-	void procTargetCartesianMid(const TargetCartesianMid::ConstPtr &msg);
-	void procTargetCartesianMul(const TargetCartesianMul::ConstPtr &msg);
-	void procFreespaceSegments(const FreespaceSegments::ConstPtr &msg);
-	void procRawPolarLong(const RawPolarLong::ConstPtr &msg);
-	void procTargetPolarLong(const TargetPolarLong::Constr &msg);
+	void procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procTargetCartesian(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procTargetCartesianMid(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procTargetCartesianMul(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procFreespaceSegments(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
+	void procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
 
 	// subscriber
 	ros::Subscriber sub_can_;
@@ -44,8 +45,8 @@ private:
 	ros::Publisher pub_raw_polar_long_;
 	ros::Publisher pub_target_polar_long_;
 
-
 };
+}
 
 #endif // _AUTOLIV_NODE_H_
 
