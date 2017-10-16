@@ -5,7 +5,7 @@ namespace octopus
 {
 
 // this inline function is to transform uint16t data into int16_t
-int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>bit_num;}
+int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>(16-bit_num);}
 
 AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 
