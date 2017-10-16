@@ -86,7 +86,7 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
     out.track_id = track_id;
     out.msg_counter = msg_counter;
     out.sensor_nr = sensor_nr;
-    out.target_format_type = target_format_type;
+    out.target_format_type = type;
     out.bearing_raw = bearing_obs;
     out.range_raw = range_obs;
     pub_target_polar_short_.publish(out);
@@ -114,7 +114,7 @@ void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped:
     out.amplitude = amp;
     out.msg_counter = msg_counter;
     out.sensor_nr = sensor_nr;
-    out.target_format_type = target_format_type;
+    out.target_format_type = type;
     out.usage = usage;
     out.doppler_alias = doppler_alias;
     pub_raw_polar_short_.publish(out);
