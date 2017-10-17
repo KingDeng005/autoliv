@@ -52,7 +52,7 @@ typedef struct
 typedef struct
 {
   uint8_t msg_counter : 4;
-  uint8_t msg_page_select : 4;
+  uint8_t meas_page_select : 4;
   uint8_t data_channel_1_msb : 8;
   uint8_t data_channel_1_lsb : 8;
   uint8_t data_channel_2_msb : 8;
