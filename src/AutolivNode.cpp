@@ -18,6 +18,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     pub_freespace_segments_ = node.advertise<autoliv::FreespaceSegments>("freespace_segments", 2);
     pub_raw_polar_long_ = node.advertise<autoliv::RawPolarLong>("raw_polar_long", 2);
     pub_target_polar_long_ = node.advertise<autoliv::TargetPolarLong>("target_polar_long", 2);
+    pub_can_ = node.advertise<dataspeed_can_msgs::CanMessage>("/can_tx", 100);
 
     // subscriber
     sub_can_ = node.subscribe("/can_tx", 1, &AutolivNode::recvCAN, this);

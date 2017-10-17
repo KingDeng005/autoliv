@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <dataspeed_can_msgs/CanMessage.h>
 #include <dataspeed_can_msgs/CanMessageStamped.h>
 #include <autoliv/FreespaceSegments.h>
 #include <autoliv/RawPolarLong.h>
@@ -33,6 +34,11 @@ private:
     void procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
 
+    // functions to send sync and command messages
+    void sendSyncReset();
+    void sendSyncShortLong();
+    void sendCommand();
+
     // subscriber
     ros::Subscriber sub_can_;
 
@@ -45,6 +51,7 @@ private:
     ros::Publisher pub_freespace_segments_;
     ros::Publisher pub_raw_polar_long_;
     ros::Publisher pub_target_polar_long_;
+    ros::Publisher pub_can_;
 
 };
 }
