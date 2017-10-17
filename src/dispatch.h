@@ -211,14 +211,26 @@ typedef struct
 
 enum
 {
-  ID_TARGET_POLAR_SHORT     = 0x1,
-  ID_RAW_POLAR_SHORT        = 0x2,
-  ID_TARGET_CARTESIAN       = 0x3,
-  ID_TARGET_CARTESIAN_MID   = 0x4,
-  ID_TARGET_CARTESIAN_MUL   = 0x5,
-  ID_FREESPACE_SEGMENTS     = 0x6,
-  ID_RAW_POLAR_LONG         = 0x7,
-  ID_TARGET_POLAR_LONG      = 0x8
+  // define can id enum
+  ID_SYNC_MESSAGE             = 0x100,
+  ID_COMMAND_SENSOR_1         = 0x201,
+  ID_COMMAND_SENSOR_2         = 0x202,
+  ID_COMMAND_SENSOR_3         = 0x203,
+  ID_COMMAND_SENSOR_4         = 0x204,
+  ID_TARGET_LOWER             = 0x300,
+  ID_TARGET_UPPER             = 0x309,
+  ID_MEAS_LOWER               = 0x380,
+  ID_MEAS_UPPER               = 0x381,
+  ID_ERR_MANAGEMENT           = 0X3FF,
+  ID_STATUS_MESSAGE           = 0X400,
+  TYPE_TARGET_POLAR_SHORT     = 0x1,
+  TYPE_RAW_POLAR_SHORT        = 0x2,
+  TYPE_TARGET_CARTESIAN       = 0x3,
+  TYPE_TARGET_CARTESIAN_MID   = 0x4,
+  TYPE_TARGET_CARTESIAN_MUL   = 0x5,
+  TYPE_FREESPACE_SEGMENTS     = 0x6,
+  TYPE_RAW_POLAR_LONG         = 0x7,
+  TYPE_TARGET_POLAR_LONG      = 0x8
 };
 
 }

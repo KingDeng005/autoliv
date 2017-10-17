@@ -29,7 +29,8 @@ AutolivNode::~AutolivNode(){
 }
 
 void sendSyncReset(){
-    // TODO
+    dataspeed_can_msgs::CanMessage out;
+    out.id = 
 }
 
 void sendSyncShortLong(){
@@ -49,23 +50,23 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
 
     // deal with target message for now
-    if(msg->msg.id > 0x300 && msg->msg.id < 0x309){
+    if(msg->msg.id > ID_TARGET_LOWER && msg->msg.id < ID_TARGET_UPPER){
         switch(getTargetType(msg)){
-            case ID_TARGET_POLAR_SHORT:
+            case TYPE_TARGET_POLAR_SHORT:
                 procTargetPolarShort(msg);
-            case ID_RAW_POLAR_SHORT:
+            case TYPE_RAW_POLAR_SHORT:
                 procRawPolarShort(msg);
-            case ID_TARGET_CARTESIAN:
+            case TYPE_TARGET_CARTESIAN:
                 procTargetCartesian(msg);
-            case ID_TARGET_CARTESIAN_MID:
+            case TYPE_TARGET_CARTESIAN_MID:
                 procTargetCartesianMid(msg);
-            case ID_TARGET_CARTESIAN_MUL:
+            case TYPE_TARGET_CARTESIAN_MUL:
                 procTargetCartesianMul(msg);
-            case ID_FREESPACE_SEGMENTS:
+            case TYPE_FREESPACE_SEGMENTS:
                 procFreespaceSegments(msg);
-            case ID_RAW_POLAR_LONG:
+            case TYPE_RAW_POLAR_LONG:
                 procRawPolarLong(msg);
-            case ID_TARGET_POLAR_LONG:
+            case TYPE_TARGET_POLAR_LONG:
                 procTargetPolarLong(msg);
             default:
                 ROS_DEBUG("undefined CAN id!");
