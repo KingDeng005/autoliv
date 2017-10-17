@@ -20,6 +20,50 @@ typedef struct
 
 typedef struct
 {
+  uint8_t sensor_1_mode : 4;
+  uint8_t sensor_2_mode : 4;
+  uint8_t sensor_3_mode : 4;
+  uint8_t sensor_4_mode : 4;
+  uint8_t data_channel_msb : 8;
+  uint8_t msg_counter : 4;
+  uint8_t : 4;
+  uint8_t data_channel_lsb : 8;
+  uint8_t : 8;
+  uint8_t : 8;
+  uint8_t : 8;
+} MsgSyncReset;
+
+typedef struct
+{
+  uint8_t sensor_1_mode : 4;
+  uint8_t sensor_2_mode : 4;
+  uint8_t sensor_3_mode : 4;
+  uint8_t sensor_4_mode : 4;
+  uint8_t data_channel_msb : 8;
+  uint8_t msg_counter : 4;
+  uint8_t : 4;
+  uint8_t data_channel_lsb : 8;
+  uint8_t host_vehicle_yawrate_msb : 8;
+  uint8_t host_vehicle_yawrate_lsb : 4;
+  uint8_t host_vehicle_velocity_msb : 4;
+  uint8_t host_vehicle_velocity_hsb : 8;
+} MsgSyncShortLongMode;
+
+typedef struct
+{
+  uint8_t msg_counter : 4;
+  uint8_t msg_page_select : 4;
+  uint8_t data_channel_1_msb : 8;
+  uint8_t data_channel_1_lsb : 8;
+  uint8_t data_channel_2_msb : 8;
+  uint8_t data_channel_2_lsb : 8;
+  uint8_t sync_msg_content : 8;
+  uint8_t : 8;
+  uint8_t : 8;
+} MsgCommand;
+
+typedef struct
+{
   uint8_t range_msb;
   uint8_t range_lsb : 4;
   uint8_t velocity_msb : 4;
