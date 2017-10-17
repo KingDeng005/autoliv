@@ -3,7 +3,7 @@
 Product Description:
 Producer: Autoliv
 Band: 77Hz
-Type: FLR
+Type: MMR
 
 OS:
 Linux 16.04.2

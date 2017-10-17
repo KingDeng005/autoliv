@@ -16,7 +16,7 @@ typedef struct
   uint8_t type : 4;
   uint8_t : 4;
   uint8_t : 8;
-} MsgTargetGeneral
+} MsgTargetGeneral;
 
 typedef struct
 {
@@ -40,8 +40,8 @@ typedef struct
 {
   uint8_t range_msb;
   uint8_t range_lsb : 4;
-  uint8_t dopper_velocity_msb : 4;
-  uint8_t dopper_velocity_lsb : 6;
+  uint8_t doppler_velocity_msb : 4;
+  uint8_t doppler_velocity_lsb : 6;
   uint8_t bearing_msb : 2;
   uint8_t bearing_lsb : 8;
   uint8_t amplitude : 8;
@@ -135,8 +135,8 @@ typedef struct
   // TODO
   uint8_t range_msb;
   uint8_t range_lsb : 4;
-  uint8_t dopper_velocity_msb : 4;
-  uint8_t dopper_velocity_lsb : 6;
+  uint8_t doppler_velocity_msb : 4;
+  uint8_t doppler_velocity_lsb : 6;
   uint8_t bearing_msb : 2;
   uint8_t bearing_lsb : 8;
   uint8_t amplitude : 8;

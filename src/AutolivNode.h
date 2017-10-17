@@ -4,14 +4,14 @@
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 #include <dataspeed_can_msgs/CanMessageStamped.h>
-#include <FreespaceSegments.h>
-#include <RawPolarLong.h>
-#include <RawPolarShort.h>
-#include <TargetCartesian.h>
-#include <TargetCartesianMid.h>
-#include <TargetCartesianMul.h>
-#include <TargetPolarLong.h>
-#include <TargetPolarShort.h>
+#include <autoliv/FreespaceSegments.h>
+#include <autoliv/RawPolarLong.h>
+#include <autoliv/RawPolarShort.h>
+#include <autoliv/TargetCartesian.h>
+#include <autoliv/TargetCartesianMid.h>
+#include <autoliv/TargetCartesianMul.h>
+#include <autoliv/TargetPolarLong.h>
+#include <autoliv/TargetPolarShort.h>
 
 namespace octopus{
 class AutolivNode{
@@ -23,7 +23,7 @@ private:
 
     // functions to receive and process the can messages
     int getTargetType(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
-    void recvCAN(const dataspeed_can_msgs::CamMessagesStamped::ConstPtr &msg);
+    void recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
     void procTargetCartesian(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);

@@ -10,14 +10,14 @@ int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16
 AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 
     // publisher
-    pub_target_polar_short_ = node.advertise<TargetPolarShort>('target_polar_short', 100);
-    pub_raw_polar_short_ = node.advertise<RawPolarShort>('raw_polar_short', 2);
-    pub_target_cartesian_ = node.advertise<TargetCartesian>('target_cartesian', 2);
-    pub_target_cartesian_mid = node.advertise<TargetCartesianMid>('target_cartesian_mid', 2);
-    pub_target_cartesian_mul = node.advertise<TargetCartesianMul>('target_cartesian_mul', 2);
-    pub_freespace_segments = node.advertise<FreespaceSegments>('freespace_segments', 2);
-    pub_raw_polar_long = node.advertise<RawPolarLong>('raw_polar_long', 2);
-    pub_target_polar_long = node.advertise<TargetPolarLong>('target_polar_long', 2);
+    pub_target_polar_short_ = node.advertise<autoliv::TargetPolarShort>("target_polar_short", 100);
+    pub_raw_polar_short_ = node.advertise<autoliv::RawPolarShort>("raw_polar_short", 2);
+    pub_target_cartesian_ = node.advertise<autoliv::TargetCartesian>("target_cartesian", 2);
+    pub_target_cartesian_mid_ = node.advertise<autoliv::TargetCartesianMid>("target_cartesian_mid", 2);
+    pub_target_cartesian_mul_ = node.advertise<autoliv::TargetCartesianMul>("target_cartesian_mul", 2);
+    pub_freespace_segments_ = node.advertise<autoliv::FreespaceSegments>("freespace_segments", 2);
+    pub_raw_polar_long_ = node.advertise<autoliv::RawPolarLong>("raw_polar_long", 2);
+    pub_target_polar_long_ = node.advertise<autoliv::TargetPolarLong>("target_polar_long", 2);
 
     // subscriber
     sub_can_ = node.subscribe("/can_tx", 1, &AutolivNode::recvCAN, this);
@@ -76,7 +76,7 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
     float range_obs = (float)uint2int(ptr->range_observed, 6) / 100;
 
     // fill message and publish
-    TargetPolarShort out;
+    autoliv::TargetPolarShort out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.range = range;
@@ -95,7 +95,7 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
 void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarShort *ptr = (const MsgRawPolarShort*)msg->msg.data.elems;
     float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;
-    float doppler_vel = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;
+    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
     float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
     float amp = (float)ptr->amplitude / 2;
     uint8_t msg_counter = ptr->msg_counter;
@@ -105,7 +105,7 @@ void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped:
     float doppler_alias = (float)ptr->doppler_alias / 5;
 
     // fill message and publish
-    RawPolarShort out;
+    autoliv::RawPolarShort out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.range = range;
@@ -135,7 +135,7 @@ void AutolivNode::procTargetCartesian(const dataspeed_can_msgs::CanMessageStampe
     uint8_t track_id = ptr->track_id;
 
     // fill message and publish
-    TargetCartesian out;
+    autoliv::TargetCartesian out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.distance_x = distance_x;
@@ -165,7 +165,7 @@ void AutolivNode::procTargetCartesianMid(const dataspeed_can_msgs::CanMessageSta
     float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;
 
     // fill message and publish
-    TargetCartesianMid out;
+    autoliv::TargetCartesianMid out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.distance_x = distance_x;
@@ -195,14 +195,14 @@ void AutolivNode::procTargetCartesianMul(const dataspeed_can_msgs::CanMessageSta
     float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;
 
     // fill message and publish
-    TargetCartesianMul out;
+    autoliv::TargetCartesianMul out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.distance_x = distance_x;
     out.track_id = track_id;
     out.velocity_x = velocity_x;
     out.velocity_y = velocity_y;
-    out.scan_type = scan_type
+    out.scan_type = scan_type;
     out.quality = quality;
     out.msg_counter = msg_counter;
     out.sensor_nr = sensor_nr;
@@ -213,7 +213,7 @@ void AutolivNode::procTargetCartesianMul(const dataspeed_can_msgs::CanMessageSta
 
 void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     // TODO
-    const MsgFreespaceSegments *ptr = (const MsgTargetCartesianMul*)msg->msg.data.elems;
+    const MsgFreespaceSegments *ptr = (const MsgFreespaceSegments*)msg->msg.data.elems;
     float seg_0 = (float)(ptr->seg_0) * .8;
     float seg_1 = (float)(ptr->seg_1_msb << 6 + ptr->seg_1_lsb) * .8;
     float seg_2 = (float)(ptr->seg_2_msb << 5 + ptr->seg_2_lsb) * .8;
@@ -227,7 +227,7 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
     uint8_t seg_idx = ptr->seg_idx;
 
     // fill message and publish
-    FreespaceSegments out;
+    autoliv::FreespaceSegments out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.segment0 = seg_0;
@@ -248,7 +248,7 @@ void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::
     // TODO
     const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
     float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
-    float doppler_vel = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;
+    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
     float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
     float amp = (float)ptr->amplitude / 2;
     uint8_t msg_counter = ptr->msg_counter;
@@ -258,7 +258,7 @@ void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::
     float doppler_alias = (float)ptr->doppler_alias / 5;
 
     // fill message and publish
-    RawPolarLong out;
+    autoliv::RawPolarLong out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.range = range;
@@ -287,7 +287,7 @@ void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStampe
     uint8_t obj_type = ptr->obj_type;
 
     // fill message and publish
-    TargetPolarLong out;
+    autoliv::TargetPolarLong out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.range = range;

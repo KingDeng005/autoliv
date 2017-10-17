@@ -7,4 +7,4 @@ uint8 msg_counter
 uint8 sensor_nr
 uint8 target_format_type
 uint8 usage
-float32 dopper_alias
+float32 doppler_alias
