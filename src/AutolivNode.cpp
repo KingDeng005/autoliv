@@ -28,6 +28,18 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 AutolivNode::~AutolivNode(){
 }
 
+void sendSyncReset(){
+    // TODO
+}
+
+void sendSyncShortLong(){
+    // TODO
+}
+
+void sendCommand(){
+    // TODO
+}
+
 // this function is to get the target format type of a message
 int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetGeneral *ptr = (const MsgTargetGeneral*)msg->msg.data.elems;
@@ -122,7 +134,6 @@ void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped:
 }
 
 void AutolivNode::procTargetCartesian(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgTargetCartesian *ptr = (const MsgTargetCartesian*)msg->msg.data.elems;
     float distance_x = (float)uint2int(ptr->distance_x_msb << 3 + ptr->distance_x_lsb, 11) / 50;
     float velocity_x = (float)uint2int(ptr->velocity_x_msb << 4 + ptr->velocity_x_lsb, 9) / 10;
@@ -153,7 +164,6 @@ void AutolivNode::procTargetCartesian(const dataspeed_can_msgs::CanMessageStampe
 }
 
 void AutolivNode::procTargetCartesianMid(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgTargetCartesianMid *ptr = (const MsgTargetCartesianMid*)msg->msg.data.elems;
     float distance_x = (float)uint2int(ptr->distance_x_msb << 4 + ptr->distance_x_lsb, 12) / 20;
     uint8_t track_id = ptr->track_id;
@@ -182,7 +192,6 @@ void AutolivNode::procTargetCartesianMid(const dataspeed_can_msgs::CanMessageSta
 }
 
 void AutolivNode::procTargetCartesianMul(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgTargetCartesianMul *ptr = (const MsgTargetCartesianMul*)msg->msg.data.elems;
     float distance_x = (float)(ptr->distance_x_msb << 3 + ptr->distance_x_lsb) / 20;
     uint8_t track_id = ptr->track_id;
@@ -213,7 +222,6 @@ void AutolivNode::procTargetCartesianMul(const dataspeed_can_msgs::CanMessageSta
 }
 
 void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgFreespaceSegments *ptr = (const MsgFreespaceSegments*)msg->msg.data.elems;
     float seg_0 = (float)(ptr->seg_0) * .8;
     float seg_1 = (float)(ptr->seg_1_msb << 6 + ptr->seg_1_lsb) * .8;
@@ -246,7 +254,6 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
 }
 
 void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
     float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
     float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
@@ -275,7 +282,6 @@ void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::
 }
 
 void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    // TODO
     const MsgTargetPolarLong *ptr = (const MsgTargetPolarLong*)msg->msg.data.elems;
     float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
     float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;
