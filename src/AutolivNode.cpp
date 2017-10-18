@@ -28,17 +28,58 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 AutolivNode::~AutolivNode(){
 }
 
-void sendSyncReset(){
+void AutolivNode::sendSyncMessage(int mode){
     dataspeed_can_msgs::CanMessage out;
-    out.id = 
+    out.id = ID_SYNC_MESSAGE;
+    out.extended = false;
+    out.dlc = sizeof(MsgSyncReset);
+
+    MsgSyncMessage *ptr = (MsgSyncMessage*)out.data.elems;
+    memset(ptr, 0x00, sizeof(*ptr));
+
+    ptr->sensor_1_mode = (uint8_t)mode;
+    ptr->sensor_2_mode = (uint8_t)mode;
+    ptr->sensor_3_mode = (uint8_t)mode;
+    ptr->sensor_4_mode = (uint8_t)mode;
+    ptr->msg_counter = 0x20;
+    ptr->data_channel_msb = 0x00;
+    ptr->data_channel_lsb = 0x00;
+    if(mode == MODE_SENSOR_RESET){
+        ptr->byte_1 = 0x00;
+        ptr->byte_2 = 0x00;
+        ptr->byte_3 = 0x00;
+    }
+    else{
+        ptr->byte_1 = 0xFF;
+        ptr->byte_2 = 0xFF;
+        ptr->byte_3 = 0xFF;
+    }
+    pub_can_.publish(out);  
 }
 
-void sendSyncShortLong(){
-    // TODO
+void AutolivNode::sendCommand(int sensor_nr){
+    dataspeed_can_msgs::CanMessage out;
+    out.id = 0x200 + sensor_nr;
+    out.dlc = 7;
+
+    MsgCommandMessage *ptr = (MsgSyncMessage*)out.data.elems;
+    memset(ptr, 0x00, sizeof(*ptr));
+
+    ptr->msg_counter = 0x0;
+    ptr->meas_page_select = 0x2;
+    ptr->data_channel_1_msb = 0x00;
+    ptr->data_channel_1_lsb = 0x00;
+    ptr->data_channel_2_msb = 0x00;
+    ptr->data_channel_2_lsb = 0x00;
+    ptr->sync_msg_content = 0x00;
+    pub_can_.publish(out);
+
 }
 
-void sendCommand(){
-    // TODO
+void Autoliv::sendCommandAll(){
+    for(int i = 1; i <= 4; ++i){
+        sendCommand(i);
+    }
 }
 
 // this function is to get the target format type of a message

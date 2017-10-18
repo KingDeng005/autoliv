@@ -35,9 +35,9 @@ private:
     void procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
 
     // functions to send sync and command messages
-    void sendSyncReset();
-    void sendSyncShortLong();
+    void sendSyncMessage(int mode);
     void sendCommand();
+    void sendCommandAll();
 
     // subscriber
     ros::Subscriber sub_can_;

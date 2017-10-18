@@ -25,29 +25,12 @@ typedef struct
   uint8_t sensor_3_mode : 4;
   uint8_t sensor_4_mode : 4;
   uint8_t data_channel_msb : 8;
-  uint8_t msg_counter : 4;
-  uint8_t : 4;
+  uint8_t msg_counter : 8;   // here combines msg_counter with reserved 4 bit
   uint8_t data_channel_lsb : 8;
-  uint8_t : 8;
-  uint8_t : 8;
-  uint8_t : 8;
-} MsgSyncReset;
-
-typedef struct
-{
-  uint8_t sensor_1_mode : 4;
-  uint8_t sensor_2_mode : 4;
-  uint8_t sensor_3_mode : 4;
-  uint8_t sensor_4_mode : 4;
-  uint8_t data_channel_msb : 8;
-  uint8_t msg_counter : 4;
-  uint8_t : 4;
-  uint8_t data_channel_lsb : 8;
-  uint8_t host_vehicle_yawrate_msb : 8;
-  uint8_t host_vehicle_yawrate_lsb : 4;
-  uint8_t host_vehicle_velocity_msb : 4;
-  uint8_t host_vehicle_velocity_hsb : 8;
-} MsgSyncShortLongMode;
+  uint8_t byte_1 : 8;
+  uint8_t byte_2 : 8;
+  uint8_t byte_3 : 8;
+} MsgSyncMessage;
 
 typedef struct
 {
@@ -60,7 +43,7 @@ typedef struct
   uint8_t sync_msg_content : 8;
   uint8_t : 8;
   uint8_t : 8;
-} MsgCommand;
+} MsgCommandMessage;
 
 typedef struct
 {
@@ -98,7 +81,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t distance_x_msb;
   uint8_t distance_x_lsb : 3;
   uint8_t velocity_x_msb : 5;
@@ -117,7 +99,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t distance_x_msb;
   uint8_t distance_x_lsb : 4;
   uint8_t track_id : 4;
@@ -135,7 +116,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t distance_x_msb;
   uint8_t distance_x_lsb : 3;
   uint8_t track_id : 5;
@@ -154,7 +134,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t seg_0 : 7;
   uint8_t seg_1_msb : 1;
   uint8_t seg_1_lsb : 6;
@@ -176,7 +155,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t range_msb;
   uint8_t range_lsb : 4;
   uint8_t doppler_velocity_msb : 4;
@@ -193,7 +171,6 @@ typedef struct
 
 typedef struct
 {
-  // TODO
   uint8_t range_msb;
   uint8_t range_lsb : 4;
   uint8_t velocity_msb : 4;
@@ -223,6 +200,7 @@ enum
   ID_MEAS_UPPER               = 0x381,
   ID_ERR_MANAGEMENT           = 0X3FF,
   ID_STATUS_MESSAGE           = 0X400,
+  // defines different target types
   TYPE_TARGET_POLAR_SHORT     = 0x1,
   TYPE_RAW_POLAR_SHORT        = 0x2,
   TYPE_TARGET_CARTESIAN       = 0x3,
@@ -230,7 +208,13 @@ enum
   TYPE_TARGET_CARTESIAN_MUL   = 0x5,
   TYPE_FREESPACE_SEGMENTS     = 0x6,
   TYPE_RAW_POLAR_LONG         = 0x7,
-  TYPE_TARGET_POLAR_LONG      = 0x8
+  TYPE_TARGET_POLAR_LONG      = 0x8,
+  // define different sensor modes
+  MODE_SENSOR_RESET           = 0,
+  MODE_SENSOR_LONG            = 2,
+  MODE_SENSOR_SHORT           = 4,
+  MODE_SENSOR_BLINE           = 5,
+  // 
 };
 
 }
