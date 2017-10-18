@@ -83,7 +83,7 @@ void AutolivNode::sendCommand(int sensor_nr){
     ptr->data_channel_1_lsb = 0x00;
     ptr->data_channel_2_msb = 0x00;
     ptr->data_channel_2_lsb = 0x00;
-    ptr->sync_msg_content = crc8(*ptr);
+    ptr->sync_msg_content = crc8(MsgSyncMessage *ptr);
     pub_can_.publish(out);
 
 }
