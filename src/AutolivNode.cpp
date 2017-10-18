@@ -7,6 +7,18 @@ namespace octopus
 // this inline function is to transform uint16t data into int16_t
 int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>(16-bit_num);}
 
+uint8_t inline crc8(MsgSyncMessage *ptr){
+    crc = *ptr;
+    for(unsigned short i = 8; i > 0; --i){
+        if (crc & 0x80){
+            crc = (crc << 1) ^ 0x31;}
+        else{
+            crc = (crc << 1);
+        }
+    }
+    return (crc);
+}
+
 AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 
     // publisher
@@ -71,7 +83,7 @@ void AutolivNode::sendCommand(int sensor_nr){
     ptr->data_channel_1_lsb = 0x00;
     ptr->data_channel_2_msb = 0x00;
     ptr->data_channel_2_lsb = 0x00;
-    ptr->sync_msg_content = 0x00;
+    ptr->sync_msg_content = crc8(*ptr);
     pub_can_.publish(out);
 
 }
