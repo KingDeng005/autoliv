@@ -1,0 +1,6 @@
+Header header
+uint8 msg_counter
+uint8 meas_page_select
+float32 data_channel_1
+float32 data_channel_2
+float32 sync_msg_content
