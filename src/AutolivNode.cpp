@@ -1,5 +1,4 @@
 #include "AutolivNode.h"
-#include "dispatch.h"
 
 namespace octopus
 {
@@ -7,16 +6,13 @@ namespace octopus
 // this inline function is to transform uint16t data into int16_t
 int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>(16-bit_num);}
 
+// this inline function is to find the crc8 for sync message
 uint8_t inline crc8(MsgSyncMessage *ptr){
-    crc = *ptr;
-    for(unsigned short i = 8; i > 0; --i){
-        if (crc & 0x80){
-            crc = (crc << 1) ^ 0x31;}
-        else{
-            crc = (crc << 1);
-        }
-    }
-    return (crc);
+    ptr->msg_counter = 0x00;
+    ptr = (uint64_t*)ptr;
+    for(unsigned short i = 8; i > 0; --i)
+        ptr = ptr & 0x80?((ptr << 1) ^ 0x31):(ptr << 1);
+    return (uint8_t*)ptr;
 }
 
 AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
@@ -35,12 +31,18 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     // subscriber
     sub_can_ = node.subscribe("/can_tx", 1, &AutolivNode::recvCAN, this);
 
+    // reset sensors
+    publishMessageReset();
+
+    // timer
+    msg_timer = node.createTimer(ros::Duration(0.1), publishMessageShortLongMode);
+
 }
 
 AutolivNode::~AutolivNode(){
 }
 
-void AutolivNode::sendSyncMessage(int mode){
+MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     dataspeed_can_msgs::CanMessage out;
     out.id = ID_SYNC_MESSAGE;
     out.extended = false;
@@ -66,10 +68,11 @@ void AutolivNode::sendSyncMessage(int mode){
         ptr->byte_2 = 0xFF;
         ptr->byte_3 = 0xFF;
     }
-    pub_can_.publish(out);  
+    pub_can_.publish(out); 
+    return ptr; 
 }
 
-void AutolivNode::sendCommand(int sensor_nr){
+void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *ptr){
     dataspeed_can_msgs::CanMessage out;
     out.id = 0x200 + sensor_nr;
     out.dlc = 7;
@@ -83,15 +86,33 @@ void AutolivNode::sendCommand(int sensor_nr){
     ptr->data_channel_1_lsb = 0x00;
     ptr->data_channel_2_msb = 0x00;
     ptr->data_channel_2_lsb = 0x00;
-    ptr->sync_msg_content = crc8(MsgSyncMessage *ptr);
+    ptr->sync_msg_content = crc8(ptr);
     pub_can_.publish(out);
 
 }
 
-void AutolivNode::sendCommandAll(){
+void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
     for(int i = 1; i <= 4; ++i){
-        sendCommand(i);
+        sendCommand(i, ptr);
     }
+}
+
+void AutolivNode::publishMessageReset(){
+    // send reset message for 5 times
+    int cnt = 5; 
+    ros::Rate r(10);
+    while(ros::ok() && cnt--){
+        MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_RESET);
+        sendCommandAll(sync_msg);
+        r.sleep();
+    }
+    ROS_DEBUG("FINISH SENDING THE RESET!");
+}
+
+void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
+    MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_SHORT);
+    sendCommandAll(sync_msg);
+    ROS_DEBUG("SYNC/COMMAND MESSAGE SENT!");
 }
 
 // this function is to get the target format type of a message

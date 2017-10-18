@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include "dispatch.h"
 #include <dataspeed_can_msgs/CanMessage.h>
 #include <dataspeed_can_msgs/CanMessageStamped.h>
 #include <autoliv/FreespaceSegments.h>
@@ -35,9 +36,11 @@ private:
     void procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg);
 
     // functions to send sync and command messages
-    void sendSyncMessage(int mode);
-    void sendCommand(int sensor_nr);
-    void sendCommandAll();
+    MsgSyncMessage* sendSyncMessage(int mode);
+    void sendCommand(int sensor_nr, MsgSyncMessage *ptr);
+    void sendCommandAll(MsgSyncMessage *ptr);
+    void publishMessageReset();
+    void publishMessageShortLongMode(const ros::TimerEvent& e);
 
     // subscriber
     ros::Subscriber sub_can_;
@@ -52,6 +55,9 @@ private:
     ros::Publisher pub_raw_polar_long_;
     ros::Publisher pub_target_polar_long_;
     ros::Publisher pub_can_;
+
+    // set timer for sending out message
+    ros::Timer msg_timer;
 
 };
 }
