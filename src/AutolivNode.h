@@ -36,7 +36,7 @@ private:
 
     // functions to send sync and command messages
     void sendSyncMessage(int mode);
-    void sendCommand();
+    void sendCommand(int sensor_nr);
     void sendCommandAll();
 
     // subscriber

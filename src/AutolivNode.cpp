@@ -32,7 +32,7 @@ void AutolivNode::sendSyncMessage(int mode){
     dataspeed_can_msgs::CanMessage out;
     out.id = ID_SYNC_MESSAGE;
     out.extended = false;
-    out.dlc = sizeof(MsgSyncReset);
+    out.dlc = sizeof(MsgSyncMessage);
 
     MsgSyncMessage *ptr = (MsgSyncMessage*)out.data.elems;
     memset(ptr, 0x00, sizeof(*ptr));
@@ -62,7 +62,7 @@ void AutolivNode::sendCommand(int sensor_nr){
     out.id = 0x200 + sensor_nr;
     out.dlc = 7;
 
-    MsgCommandMessage *ptr = (MsgSyncMessage*)out.data.elems;
+    MsgCommandMessage *ptr = (MsgCommandMessage*)out.data.elems;
     memset(ptr, 0x00, sizeof(*ptr));
 
     ptr->msg_counter = 0x0;
@@ -76,7 +76,7 @@ void AutolivNode::sendCommand(int sensor_nr){
 
 }
 
-void Autoliv::sendCommandAll(){
+void AutolivNode::sendCommandAll(){
     for(int i = 1; i <= 4; ++i){
         sendCommand(i);
     }
