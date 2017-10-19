@@ -21,6 +21,7 @@ public:
     AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh);
     ~AutolivNode();
 
+
 private:
 
     // functions to receive and process the can messages
@@ -39,8 +40,10 @@ private:
     MsgSyncMessage* sendSyncMessage(int mode);
     void sendCommand(int sensor_nr, MsgSyncMessage *ptr);
     void sendCommandAll(MsgSyncMessage *ptr);
-    void publishMessageReset();
+    // set timer for sending out message
+    ros::Timer msg_timer;
     void publishMessageShortLongMode(const ros::TimerEvent& e);
+    void publishMessageReset();
 
     // subscriber
     ros::Subscriber sub_can_;
@@ -55,9 +58,6 @@ private:
     ros::Publisher pub_raw_polar_long_;
     ros::Publisher pub_target_polar_long_;
     ros::Publisher pub_can_;
-
-    // set timer for sending out message
-    ros::Timer msg_timer;
 
 };
 }

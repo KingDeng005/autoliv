@@ -9,10 +9,11 @@ int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16
 // this inline function is to find the crc8 for sync message
 uint8_t inline crc8(MsgSyncMessage *ptr){
     ptr->msg_counter = 0x00;
-    ptr = (uint64_t*)ptr;
+    uint64_t* ptr_uint = (uint64_t*)ptr;
     for(unsigned short i = 8; i > 0; --i)
-        ptr = ptr & 0x80?((ptr << 1) ^ 0x31):(ptr << 1);
-    return (uint8_t*)ptr;
+        *ptr_uint = *ptr_uint & 0x80?((*ptr_uint << 1) ^ 0x31):(*ptr_uint << 1);
+    uint8_t crc = (uint8_t)*ptr_uint;
+    return crc;
 }
 
 AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
@@ -33,9 +34,9 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 
     // reset sensors
     publishMessageReset();
-
-    // timer
-    msg_timer = node.createTimer(ros::Duration(0.1), publishMessageShortLongMode);
+    
+    // initialize the timer
+    msg_timer = node.createTimer(ros::Duration(0.1), &AutolivNode::publishMessageShortLongMode, this);
 
 }
 
@@ -72,9 +73,10 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     return ptr; 
 }
 
-void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *ptr){
+void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
     dataspeed_can_msgs::CanMessage out;
     out.id = 0x200 + sensor_nr;
+    out.extended = false;
     out.dlc = 7;
 
     MsgCommandMessage *ptr = (MsgCommandMessage*)out.data.elems;
@@ -86,7 +88,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *ptr){
     ptr->data_channel_1_lsb = 0x00;
     ptr->data_channel_2_msb = 0x00;
     ptr->data_channel_2_lsb = 0x00;
-    ptr->sync_msg_content = crc8(ptr);
+    ptr->sync_msg_content = crc8(sync_ptr);
     pub_can_.publish(out);
 
 }
@@ -109,8 +111,9 @@ void AutolivNode::publishMessageReset(){
     ROS_DEBUG("FINISH SENDING THE RESET!");
 }
 
+// for timer trigger handler
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
-    MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_SHORT);
+    MsgSyncMessage* sync_msg = AutolivNode::sendSyncMessage(MODE_SENSOR_SHORT);
     sendCommandAll(sync_msg);
     ROS_DEBUG("SYNC/COMMAND MESSAGE SENT!");
 }
