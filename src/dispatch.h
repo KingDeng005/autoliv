@@ -20,13 +20,13 @@ typedef struct
 
 typedef struct
 {
-  uint8_t sensor_1_mode : 4;
   uint8_t sensor_2_mode : 4;
-  uint8_t sensor_3_mode : 4;
+  uint8_t sensor_1_mode : 4;
   uint8_t sensor_4_mode : 4;
+  uint8_t sensor_3_mode : 4;
   uint8_t data_channel_msb : 8;
-  uint8_t msg_counter : 4;
   uint8_t : 4;
+  uint8_t msg_counter : 4;
   uint8_t data_channel_lsb : 8;
   uint8_t byte_1 : 8;
   uint8_t byte_2 : 8;
@@ -35,8 +35,8 @@ typedef struct
 
 typedef struct
 {
-  uint8_t msg_counter : 4;
   uint8_t meas_page_select : 4;
+  uint8_t msg_counter : 4;
   uint8_t data_channel_1_msb : 8;
   uint8_t data_channel_1_lsb : 8;
   uint8_t data_channel_2_msb : 8;

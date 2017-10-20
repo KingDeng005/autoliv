@@ -108,7 +108,7 @@ void AutolivNode::publishMessageReset(){
 
 // for timer trigger handler
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
-    MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_SHORT);
+    MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_LONG);
     sendCommandAll(sync_msg);
     // increment the counter
     if(msg_counter_count++ > 15) msg_counter_count=0;
@@ -121,31 +121,37 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 }
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    //ROS_ERROR("RECEIVING!");
     // deal with target message for now
-    if(msg->msg.id > ID_TARGET_LOWER && msg->msg.id < ID_TARGET_UPPER){
+    if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER){
         switch(getTargetType(msg)){
             case TYPE_TARGET_POLAR_SHORT:
                 procTargetPolarShort(msg);
+                break;
             case TYPE_RAW_POLAR_SHORT:
                 procRawPolarShort(msg);
+                break;
             case TYPE_TARGET_CARTESIAN:
                 procTargetCartesian(msg);
+                break;
             case TYPE_TARGET_CARTESIAN_MID:
                 procTargetCartesianMid(msg);
+                break;
             case TYPE_TARGET_CARTESIAN_MUL:
                 procTargetCartesianMul(msg);
+                break;
             case TYPE_FREESPACE_SEGMENTS:
                 procFreespaceSegments(msg);
+                break;
             case TYPE_RAW_POLAR_LONG:
                 procRawPolarLong(msg);
+                break;
             case TYPE_TARGET_POLAR_LONG:
                 procTargetPolarLong(msg);
+                break;
             default:
                 ROS_DEBUG("undefined CAN id!");
-            break;
+                break;
         }
-        
     }
 }
 
