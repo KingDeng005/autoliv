@@ -13,7 +13,7 @@ typedef struct
   uint8_t : 8;
   uint8_t : 8;
   uint8_t : 8;
-  uint8_t type : 4;
+  uint8_t target_format_type : 4;
   uint8_t : 4;
   uint8_t : 8;
 } MsgTargetGeneral;

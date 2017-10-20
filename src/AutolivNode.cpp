@@ -30,7 +30,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     pub_can_ = node.advertise<dataspeed_can_msgs::CanMessage>("/can_tx", 100);
 
     // subscriber
-    sub_can_ = node.subscribe("/can_tx", 1, &AutolivNode::recvCAN, this);
+    sub_can_ = node.subscribe("/can_rx", 1, &AutolivNode::recvCAN, this);
 
     // reset sensors
     publishMessageReset();
@@ -56,20 +56,22 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     ptr->sensor_2_mode = (uint8_t)mode;
     ptr->sensor_3_mode = (uint8_t)mode;
     ptr->sensor_4_mode = (uint8_t)mode;
-    ptr->msg_counter = 0x20;
+    //ROS_ERROR("%d",mode);
+    ptr->msg_counter = 0x00;
     ptr->data_channel_msb = 0x00;
     ptr->data_channel_lsb = 0x00;
-    if(mode == MODE_SENSOR_RESET){
+    //if(mode == MODE_SENSOR_RESET){
         ptr->byte_1 = 0x00;
         ptr->byte_2 = 0x00;
         ptr->byte_3 = 0x00;
-    }
+    /*}
     else{
         ptr->byte_1 = 0xFF;
         ptr->byte_2 = 0xFF;
         ptr->byte_3 = 0xFF;
-    }
+    }*/
     pub_can_.publish(out); 
+    //ROS_ERROR("FINISH SYNCING MESSAGE!");
     return ptr; 
 }
 
@@ -78,11 +80,11 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
     out.id = 0x200 + sensor_nr;
     out.extended = false;
     out.dlc = 7;
-
+    ROS_ERROR("%d",out.id);
     MsgCommandMessage *ptr = (MsgCommandMessage*)out.data.elems;
     memset(ptr, 0x00, sizeof(*ptr));
 
-    ptr->msg_counter = 0x0;
+    ptr->msg_counter = 0x00;
     ptr->meas_page_select = 0x2;
     ptr->data_channel_1_msb = 0x00;
     ptr->data_channel_1_lsb = 0x00;
@@ -90,6 +92,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
     ptr->data_channel_2_lsb = 0x00;
     ptr->sync_msg_content = crc8(sync_ptr);
     pub_can_.publish(out);
+    //ROS_ERROR("FINISH SENDING COMMAND!");
 
 }
 
@@ -108,7 +111,7 @@ void AutolivNode::publishMessageReset(){
         sendCommandAll(sync_msg);
         r.sleep();
     }
-    ROS_DEBUG("FINISH SENDING THE RESET!");
+    ROS_ERROR("FINISH SENDING THE RESET!");
 }
 
 // for timer trigger handler
@@ -121,11 +124,11 @@ void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
 // this function is to get the target format type of a message
 int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetGeneral *ptr = (const MsgTargetGeneral*)msg->msg.data.elems;
-    return ptr->type;
+    return ptr->target_format_type;
 }
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-
+    ROS_ERROR("RECEIVING!");
     // deal with target message for now
     if(msg->msg.id > ID_TARGET_LOWER && msg->msg.id < ID_TARGET_UPPER){
         switch(getTargetType(msg)){
