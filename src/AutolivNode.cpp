@@ -3,6 +3,7 @@
 namespace octopus
 {
 
+int msg_counter_count=0;
 // this inline function is to transform uint16t data into int16_t
 int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>(16-bit_num);}
 
@@ -57,7 +58,10 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     ptr->sensor_3_mode = (uint8_t)mode;
     ptr->sensor_4_mode = (uint8_t)mode;
     //ROS_ERROR("%d",mode);
-    ptr->msg_counter = 0x00;
+    ROS_ERROR(" ");
+    ptr->msg_counter = msg_counter_count;
+    msg_counter_count++;
+    if(msg_counter_count>15) msg_counter_count=0;
     ptr->data_channel_msb = 0x00;
     ptr->data_channel_lsb = 0x00;
     //if(mode == MODE_SENSOR_RESET){
@@ -70,8 +74,7 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
         ptr->byte_2 = 0xFF;
         ptr->byte_3 = 0xFF;
     }*/
-    pub_can_.publish(out); 
-    //ROS_ERROR("FINISH SYNCING MESSAGE!");
+    pub_can_.publish(out);
     return ptr; 
 }
 
@@ -80,26 +83,24 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
     out.id = 0x200 + sensor_nr;
     out.extended = false;
     out.dlc = 7;
-    ROS_ERROR("%d",out.id);
     MsgCommandMessage *ptr = (MsgCommandMessage*)out.data.elems;
     memset(ptr, 0x00, sizeof(*ptr));
 
-    ptr->msg_counter = 0x00;
-    ptr->meas_page_select = 0x2;
-    ptr->data_channel_1_msb = 0x00;
-    ptr->data_channel_1_lsb = 0x00;
-    ptr->data_channel_2_msb = 0x00;
-    ptr->data_channel_2_lsb = 0x00;
+    ptr->msg_counter = msg_counter_count;
+    ptr->meas_page_select = 2;
+    ptr->data_channel_1_msb = 0;
+    ptr->data_channel_1_lsb = 0;
+    ptr->data_channel_2_msb = 0;
+    ptr->data_channel_2_lsb = 0;
     ptr->sync_msg_content = crc8(sync_ptr);
     pub_can_.publish(out);
-    //ROS_ERROR("FINISH SENDING COMMAND!");
-
 }
 
 void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
     for(int i = 1; i <= 4; ++i){
         sendCommand(i, ptr);
     }
+    //sendCommand(1, ptr);
 }
 
 void AutolivNode::publishMessageReset(){
@@ -116,9 +117,9 @@ void AutolivNode::publishMessageReset(){
 
 // for timer trigger handler
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
-    MsgSyncMessage* sync_msg = AutolivNode::sendSyncMessage(MODE_SENSOR_SHORT);
+    MsgSyncMessage* sync_msg = AutolivNode::sendSyncMessage(MODE_SENSOR_LONG);
     sendCommandAll(sync_msg);
-    ROS_DEBUG("SYNC/COMMAND MESSAGE SENT!");
+    //ROS_ERROR("SYNC/COMMAND MESSAGE SENT!");
 }
 
 // this function is to get the target format type of a message
@@ -128,7 +129,7 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 }
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    ROS_ERROR("RECEIVING!");
+    //ROS_ERROR("RECEIVING!");
     // deal with target message for now
     if(msg->msg.id > ID_TARGET_LOWER && msg->msg.id < ID_TARGET_UPPER){
         switch(getTargetType(msg)){
