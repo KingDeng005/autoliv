@@ -42,7 +42,7 @@ private:
     void sendCommandAll(MsgSyncMessage *ptr);
     // set timer for sending out message
     ros::Timer msg_timer;
-    void static publishMessageShortLongMode(const ros::TimerEvent& e);
+    void publishMessageShortLongMode(const ros::TimerEvent& e);
     void publishMessageReset();
 
     // subscriber
