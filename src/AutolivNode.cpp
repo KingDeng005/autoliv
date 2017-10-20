@@ -117,7 +117,7 @@ void AutolivNode::publishMessageReset(){
 
 // for timer trigger handler
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
-    MsgSyncMessage* sync_msg = AutolivNode::sendSyncMessage(MODE_SENSOR_LONG);
+    MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_SHORT);
     sendCommandAll(sync_msg);
     //ROS_ERROR("SYNC/COMMAND MESSAGE SENT!");
 }
