@@ -9,11 +9,12 @@ int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16
 
 // this inline function is to find the crc8 for sync message
 uint8_t inline crc8(MsgSyncMessage *ptr){
-    ptr->msg_counter = 0x00;
-    uint64_t* ptr_uint = (uint64_t*)ptr;
+    MsgSyncMessage tmp = *ptr;
+    MsgSyncMessage *tmp_ptr = &tmp;
+    uint64_t *msg = (uint64_t*)tmp_ptr;
     for(unsigned short i = 8; i > 0; --i)
-        *ptr_uint = *ptr_uint & 0x80?((*ptr_uint << 1) ^ 0x31):(*ptr_uint << 1);
-    uint8_t crc = (uint8_t)*ptr_uint;
+        *msg = *msg & 0x80?((*msg << 1) ^ 0x31):(*msg << 1);
+    uint8_t crc = (uint8_t)*msg;
     return crc;
 }
 
@@ -57,23 +58,12 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     ptr->sensor_2_mode = (uint8_t)mode;
     ptr->sensor_3_mode = (uint8_t)mode;
     ptr->sensor_4_mode = (uint8_t)mode;
-    //ROS_ERROR("%d",mode);
-    ROS_ERROR(" ");
     ptr->msg_counter = msg_counter_count;
-    msg_counter_count++;
-    if(msg_counter_count>15) msg_counter_count=0;
     ptr->data_channel_msb = 0x00;
     ptr->data_channel_lsb = 0x00;
-    //if(mode == MODE_SENSOR_RESET){
-        ptr->byte_1 = 0x00;
-        ptr->byte_2 = 0x00;
-        ptr->byte_3 = 0x00;
-    /*}
-    else{
-        ptr->byte_1 = 0xFF;
-        ptr->byte_2 = 0xFF;
-        ptr->byte_3 = 0xFF;
-    }*/
+    ptr->byte_1 = 0x00;
+    ptr->byte_2 = 0x00;
+    ptr->byte_3 = 0x00;
     pub_can_.publish(out);
     return ptr; 
 }
@@ -100,11 +90,10 @@ void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
     for(int i = 1; i <= 4; ++i){
         sendCommand(i, ptr);
     }
-    //sendCommand(1, ptr);
 }
 
 void AutolivNode::publishMessageReset(){
-    // send reset message for 5 times
+    // send reset message 5 times
     int cnt = 5; 
     ros::Rate r(10);
     while(ros::ok() && cnt--){
@@ -112,6 +101,8 @@ void AutolivNode::publishMessageReset(){
         sendCommandAll(sync_msg);
         r.sleep();
     }
+    // increment the counter
+    if(msg_counter_count++ > 15) msg_counter_count=0;
     ROS_ERROR("FINISH SENDING THE RESET!");
 }
 
@@ -119,7 +110,8 @@ void AutolivNode::publishMessageReset(){
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
     MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_SHORT);
     sendCommandAll(sync_msg);
-    //ROS_ERROR("SYNC/COMMAND MESSAGE SENT!");
+    // increment the counter
+    if(msg_counter_count++ > 15) msg_counter_count=0;
 }
 
 // this function is to get the target format type of a message
