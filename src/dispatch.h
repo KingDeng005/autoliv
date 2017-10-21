@@ -216,8 +216,7 @@ enum
   MODE_SENSOR_RESET           = 0,
   MODE_SENSOR_LONG            = 2,
   MODE_SENSOR_SHORT           = 4,
-  MODE_SENSOR_BLINE           = 5,
-  // 
+  MODE_SENSOR_BLIND           = 5
 };
 
 }

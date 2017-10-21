@@ -39,7 +39,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
+    msg_timer = node.createTimer(ros::Duration(0.1), &AutolivNode::publishMessageShortLongMode, this);
 
 }
 
