@@ -38,7 +38,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(0.1), &AutolivNode::publishMessageShortLongMode, this);
+    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
 
 }
 
@@ -87,7 +87,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
 }
 
 void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
-    for(int i = 1; i <= 4; ++i){
+    for(int i = 4; i <= 4; ++i){
         sendCommand(i, ptr);
     }
 }
@@ -334,31 +334,41 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
 }
 
 void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
-    const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
-    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
-    float amp = (float)ptr->amplitude / 2;
-    uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
-    uint8_t type = ptr->target_format_type;
-    uint8_t usage = ptr->usage;
-    float doppler_alias = (float)ptr->doppler_alias / 5;
+   ROS_ERROR("msg_elems:[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+   const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
+   //ROS_ERROR("ptr:[%d %d %d %d %d %d %d %d]",*ptr,*(ptr+1),*(ptr+2),*(ptr+3),*(ptr+4),*(ptr+5),*(ptr+6),*(ptr+7));
+   ROS_ERROR("ptr_sub:[%d %d %d %d %d %d %d %d %d %d %d %d]",ptr->range_msb, \
+              ptr->range_lsb , ptr->doppler_velocity_msb, \
+              ptr->doppler_velocity_lsb ,ptr->bearing_msb, \
+              ptr->bearing_lsb, \
+              ptr->amplitude, \
+              ptr->msg_counter , ptr->sensor_nr, \
+              ptr->target_format_type , ptr->usage, \
+              ptr->doppler_alias);
+   float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
+   float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
+   float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
+   float amp = (float)ptr->amplitude / 2;
+   uint8_t msg_counter = ptr->msg_counter;
+   uint8_t sensor_nr = ptr->sensor_nr;
+   uint8_t type = ptr->target_format_type;
+   uint8_t usage = ptr->usage;
+   float doppler_alias = (float)ptr->doppler_alias / 5;
 
-    // fill message and publish
-    autoliv::RawPolarLong out;
-    out.header.frame_id = "base_link";
-    out.header.stamp = ros::Time::now();
-    out.range = range;
-    out.doppler_velocity = doppler_vel;
-    out.bearing = bearing;
-    out.amplitude = amp;
-    out.msg_counter = msg_counter;
-    out.sensor_nr = sensor_nr;
-    out.target_format_type = type;
-    out.usage = usage;
-    out.doppler_alias = doppler_alias;
-    pub_raw_polar_long_.publish(out);
+   // fill message and publish
+   autoliv::RawPolarLong out;
+   out.header.frame_id = "base_link";
+   out.header.stamp = ros::Time::now();
+   out.range = range;
+   out.doppler_velocity = doppler_vel;
+   out.bearing = bearing;
+   out.amplitude = amp;
+   out.msg_counter = msg_counter;
+   out.sensor_nr = sensor_nr;
+   out.target_format_type = type;
+   out.usage = usage;
+   out.doppler_alias = doppler_alias;
+   pub_raw_polar_long_.publish(out);
 }
 
 void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
