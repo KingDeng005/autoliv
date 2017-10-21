@@ -39,7 +39,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(0.1), &AutolivNode::publishMessageShortLongMode, this);
+    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
 
 }
 
@@ -88,7 +88,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
 }
 
 void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
-    for(int i = 1; i <= 4; ++i){
+    for(int i = 4; i <= 4; ++i){
         sendCommand(i, ptr);
     }
 }
