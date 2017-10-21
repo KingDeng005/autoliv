@@ -1,4 +1,5 @@
 #include "AutolivNode.h"
+#include <string>
 
 namespace octopus
 {
@@ -157,22 +158,22 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
 
 void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarShort *ptr = (const MsgTargetPolarShort*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;
-    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;
-    uint8_t quality = ptr->quality;
-    uint8_t track_id = ptr->track_id;
-    uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;   // 40.95 unknown
+    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;  // -71.2 unknown
+    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    uint8_t quality = ptr->quality;  // 0 unobserved, 15 inconclusive
+    uint8_t track_id = ptr->track_id;  // 15 unknown 
+    uint8_t msg_counter = ptr->msg_counter;  
+    uint8_t sensor_nr = ptr->sensor_nr;   // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
-    int16_t bearing_obs = uint2int(ptr->bearing_observed_msb << 2 + ptr->bearing_observed_lsb, 6);
-    float range_obs = (float)uint2int(ptr->range_observed, 6) / 100;
+    int16_t bearing_obs = uint2int(ptr->bearing_observed_msb << 2 + ptr->bearing_observed_lsb, 6); // -32 unknown
+    float range_obs = (float)uint2int(ptr->range_observed, 6) / 100;  // -0.32 unknown
 
     // fill message and publish
     autoliv::TargetPolarShort out;
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
-    out.range = range;
+    out.range = range;  
     out.velocity = velocity;
     out.bearing = bearing;
     out.quality = quality;
@@ -187,15 +188,15 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
 
 void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarShort *ptr = (const MsgRawPolarShort*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;
-    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
-    float amp = (float)ptr->amplitude / 2;
-    uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;   // 40.95 unknown 
+    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
+    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
+    float amp = (float)ptr->amplitude / 2; // 127.5 unknown
+    uint8_t msg_counter = ptr->msg_counter;  
+    uint8_t sensor_nr = ptr->sensor_nr;    // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
     uint8_t usage = ptr->usage;
-    float doppler_alias = (float)ptr->doppler_alias / 5;
+    float doppler_alias = (float)ptr->doppler_alias / 5;  // 51 unknown
 
     // fill message and publish
     autoliv::RawPolarShort out;
@@ -215,16 +216,16 @@ void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped:
 
 void AutolivNode::procTargetCartesian(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetCartesian *ptr = (const MsgTargetCartesian*)msg->msg.data.elems;
-    float distance_x = (float)uint2int(ptr->distance_x_msb << 3 + ptr->distance_x_lsb, 11) / 50;
-    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 4 + ptr->velocity_x_lsb, 9) / 10;
-    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 5 + ptr->velocity_y_lsb, 9) / 10;
-    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 11) / 50;
-    uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    float distance_x = (float)uint2int(ptr->distance_x_msb << 3 + ptr->distance_x_lsb, 11) / 50;   // -20.48 unknown
+    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 4 + ptr->velocity_x_lsb, 9) / 10;    // -25.6 unknown
+    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 5 + ptr->velocity_y_lsb, 9) / 10;    // -25.6 unknown
+    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 11) / 50;   // -20.48 unknown
+    uint8_t msg_counter = ptr->msg_counter;  
+    uint8_t sensor_nr = ptr->sensor_nr;       // 0/5-15 unknown
     uint8_t type = ptr->target_format_type;
     uint8_t obj_type = ptr->obj_type;
-    uint8_t quality = ptr->quality;
-    uint8_t track_id = ptr->track_id;
+    uint8_t quality = ptr->quality;    // 0 unobserved, 15 inconclusive
+    uint8_t track_id = ptr->track_id;  // 15 unknown
 
     // fill message and publish
     autoliv::TargetCartesian out;
@@ -245,15 +246,15 @@ void AutolivNode::procTargetCartesian(const dataspeed_can_msgs::CanMessageStampe
 
 void AutolivNode::procTargetCartesianMid(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetCartesianMid *ptr = (const MsgTargetCartesianMid*)msg->msg.data.elems;
-    float distance_x = (float)uint2int(ptr->distance_x_msb << 4 + ptr->distance_x_lsb, 12) / 20;
-    uint8_t track_id = ptr->track_id;
-    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 2 + ptr->velocity_x_lsb, 10) / 10 - 20;
-    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 4 + ptr->velocity_y_lsb, 10) / 10;
-    uint8_t quality = ptr->quality;
-    uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
-    uint8_t type = ptr->target_format_type;
-    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;
+    float distance_x = (float)uint2int(ptr->distance_x_msb << 4 + ptr->distance_x_lsb, 12) / 20;  // -102.4 unknown
+    uint8_t track_id = ptr->track_id;    // 15 unknown
+    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 2 + ptr->velocity_x_lsb, 10) / 10 - 20;   // -71.2 unknown
+    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 4 + ptr->velocity_y_lsb, 10) / 10;        // -51.2 unknown
+    uint8_t quality = ptr->quality;      // 0 unobserved, 15 inconclusive
+    uint8_t msg_counter = ptr->msg_counter;  
+    uint8_t sensor_nr = ptr->sensor_nr;  // 0/5-15 unknown
+    uint8_t type = ptr->target_format_type;   
+    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;        // -40.96 unknown
 
     // fill message and publish
     autoliv::TargetCartesianMid out;
@@ -273,16 +274,16 @@ void AutolivNode::procTargetCartesianMid(const dataspeed_can_msgs::CanMessageSta
 
 void AutolivNode::procTargetCartesianMul(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetCartesianMul *ptr = (const MsgTargetCartesianMul*)msg->msg.data.elems;
-    float distance_x = (float)(ptr->distance_x_msb << 3 + ptr->distance_x_lsb) / 20;
-    uint8_t track_id = ptr->track_id;
-    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 2 + ptr->velocity_x_lsb, 10) / 10 - 20;
-    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 4 + ptr->velocity_y_lsb, 10) / 10;
+    float distance_x = (float)(ptr->distance_x_msb << 3 + ptr->distance_x_lsb) / 20;  // 102.35 unknown
+    uint8_t track_id = ptr->track_id;  // 31 unknown
+    float velocity_x = (float)uint2int(ptr->velocity_x_msb << 2 + ptr->velocity_x_lsb, 10) / 10 - 20;   // -71.2 unknown
+    float velocity_y = (float)uint2int(ptr->velocity_y_msb << 4 + ptr->velocity_y_lsb, 10) / 10;        // -51.2 unknown
     uint8_t scan_type = ptr->scan_type;
     uint8_t quality = ptr->quality;
     uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    uint8_t sensor_nr = ptr->sensor_nr;   // 0/5-15 unknown
     uint8_t type = ptr->target_format_type;
-    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;
+    float distance_y = (float)uint2int(ptr->distance_y_msb << 8 + ptr->distance_y_lsb, 12) / 50;        // -40.96 unknown
 
     // fill message and publish
     autoliv::TargetCartesianMul out;
@@ -310,7 +311,7 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
     float seg_4 = (float)(ptr->seg_4_msb << 3 + ptr->seg_4_lsb) * .8;
     float seg_5 = (float)(ptr->seg_1_msb << 2 + ptr->seg_5_lsb) * .8;
     uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    uint8_t sensor_nr = ptr->sensor_nr;   // 0/5-15 unknown
     uint8_t type = ptr->target_format_type;
     float seg_6 = (float)(ptr->seg_6_msb << 5 + ptr->seg_6_lsb) * .8;
     uint8_t seg_idx = ptr->seg_idx;
@@ -335,15 +336,15 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
 
 void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
-    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; 
-    float amp = (float)ptr->amplitude / 2;
+    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;    // 204.75 unknown
+    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;   // -71.2 unknown 
+    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;                               // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    float amp = (float)ptr->amplitude / 2;    // 127.5 unknown
     uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    uint8_t sensor_nr = ptr->sensor_nr;       // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
     uint8_t usage = ptr->usage;
-    float doppler_alias = (float)ptr->doppler_alias / 5;
+    float doppler_alias = (float)ptr->doppler_alias / 5;  // 51 unknown
 
     // fill message and publish
     autoliv::RawPolarLong out;
@@ -363,15 +364,15 @@ void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::
 
 void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarLong *ptr = (const MsgTargetPolarLong*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;
-    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;
-    uint8_t quality = ptr->quality;
-    uint8_t track_id = ptr->track_id;
+    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;  // 40.95 unknown
+    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;   // -71.2 unknown
+    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;            // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    uint8_t quality = ptr->quality;   // 0 unobserved, 15 inconclusive
+    uint8_t track_id = ptr->track_id; // 15 unknown
     uint8_t msg_counter = ptr->msg_counter;
-    uint8_t sensor_nr = ptr->sensor_nr;
+    uint8_t sensor_nr = ptr->sensor_nr;   // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
-    uint8_t obj_type = ptr->obj_type;
+    uint8_t obj_type = ptr->obj_type;     // 0 unknown
 
     // fill message and publish
     autoliv::TargetPolarLong out;
