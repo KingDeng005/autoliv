@@ -336,16 +336,16 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
 
 void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;    // 204.75 unknown
-    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;   // -71.2 unknown 
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;                               // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 20;    // 204.75 unknown
+    float doppler_vel = ((float)(ptr->doppler_velocity_msb << 6) + (float)(ptr->doppler_velocity_lsb)) / 10 - 20;   // -71.2 unknown 
+    float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;                               // -102.2 right unknown, 102.2 unknown, -102.4 unknown
     float amp = (float)ptr->amplitude / 2;    // 127.5 unknown
     uint8_t msg_counter = ptr->msg_counter;
     uint8_t sensor_nr = ptr->sensor_nr;       // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
     uint8_t usage = ptr->usage;
     float doppler_alias = (float)ptr->doppler_alias / 5;  // 51 unknown
-
+    //ROS_ERROR("%f,%f,%f,%f",range,(float)(ptr->range_msb << 4),(float)(ptr->range_lsb),((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)));
     // fill message and publish
     autoliv::RawPolarLong out;
     out.header.frame_id = "base_link";
