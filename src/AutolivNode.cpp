@@ -23,13 +23,13 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
 
     // publisher
     pub_target_polar_short_ = node.advertise<autoliv::TargetPolarShort>("target_polar_short", 100);
-    pub_raw_polar_short_ = node.advertise<autoliv::RawPolarShort>("raw_polar_short", 2);
-    pub_target_cartesian_ = node.advertise<autoliv::TargetCartesian>("target_cartesian", 2);
-    pub_target_cartesian_mid_ = node.advertise<autoliv::TargetCartesianMid>("target_cartesian_mid", 2);
-    pub_target_cartesian_mul_ = node.advertise<autoliv::TargetCartesianMul>("target_cartesian_mul", 2);
-    pub_freespace_segments_ = node.advertise<autoliv::FreespaceSegments>("freespace_segments", 2);
-    pub_raw_polar_long_ = node.advertise<autoliv::RawPolarLong>("raw_polar_long", 2);
-    pub_target_polar_long_ = node.advertise<autoliv::TargetPolarLong>("target_polar_long", 2);
+    pub_raw_polar_short_ = node.advertise<autoliv::RawPolarShort>("raw_polar_short", 100);
+    pub_target_cartesian_ = node.advertise<autoliv::TargetCartesian>("target_cartesian", 100);
+    pub_target_cartesian_mid_ = node.advertise<autoliv::TargetCartesianMid>("target_cartesian_mid", 100);
+    pub_target_cartesian_mul_ = node.advertise<autoliv::TargetCartesianMul>("target_cartesian_mul", 100);
+    pub_freespace_segments_ = node.advertise<autoliv::FreespaceSegments>("freespace_segments", 100);
+    pub_raw_polar_long_ = node.advertise<autoliv::RawPolarLong>("raw_polar_long", 100);
+    pub_target_polar_long_ = node.advertise<autoliv::TargetPolarLong>("target_polar_long", 100);
     pub_can_ = node.advertise<dataspeed_can_msgs::CanMessage>("/can_tx", 100);
 
     // subscriber
@@ -39,8 +39,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(0.1), &AutolivNode::publishMessageShortLongMode, this);
-
+    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
 }
 
 AutolivNode::~AutolivNode(){
@@ -123,7 +122,12 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     // deal with target message for now
-    if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER){
+    //if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER && getTargetType(msg)<=8 && getTargetType(msg)>0){
+    if(getTargetType(msg)<=8 && getTargetType(msg)>0){
+        ROS_ERROR("msg_type: %d",getTargetType(msg));
+        const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
+        ROS_ERROR("[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+        ROS_ERROR("msg_counter: %d",ptr->msg_counter);
         switch(getTargetType(msg)){
             case TYPE_TARGET_POLAR_SHORT:
                 procTargetPolarShort(msg);
@@ -150,7 +154,7 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
                 procTargetPolarLong(msg);
                 break;
             default:
-                ROS_DEBUG("undefined CAN id!");
+                ROS_ERROR("undefined CAN id!");
                 break;
         }
     }
@@ -158,9 +162,9 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
 
 void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarShort *ptr = (const MsgTargetPolarShort*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;   // 40.95 unknown
-    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;  // -71.2 unknown
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown
+    float velocity = ((float)(ptr->velocity_msb << 6) + (float)(ptr->velocity_lsb)) / 10 - 20;  // -71.2 unknown
+    float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
     uint8_t quality = ptr->quality;  // 0 unobserved, 15 inconclusive
     uint8_t track_id = ptr->track_id;  // 15 unknown 
     uint8_t msg_counter = ptr->msg_counter;  
@@ -188,7 +192,7 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
 
 void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarShort *ptr = (const MsgRawPolarShort*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 100;   // 40.95 unknown 
+    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown 
     float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
     float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
     float amp = (float)ptr->amplitude / 2; // 127.5 unknown
@@ -336,16 +340,22 @@ void AutolivNode::procFreespaceSegments(const dataspeed_can_msgs::CanMessageStam
 
 void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
-    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 20;    // 204.75 unknown
-    float doppler_vel = ((float)(ptr->doppler_velocity_msb << 6) + (float)(ptr->doppler_velocity_lsb)) / 10 - 20;   // -71.2 unknown 
-    float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;                               // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    //ROS_ERROR("[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 20;  // 40.95 unknown
+    float doppler_vel = ((float)(ptr->doppler_velocity_msb << 6) + (float)(ptr->doppler_velocity_lsb)) / 10 - 20;  // -71.2 unknown 
+    float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
     float amp = (float)ptr->amplitude / 2;    // 127.5 unknown
     uint8_t msg_counter = ptr->msg_counter;
     uint8_t sensor_nr = ptr->sensor_nr;       // 0/5-15 undefined
     uint8_t type = ptr->target_format_type;
     uint8_t usage = ptr->usage;
     float doppler_alias = (float)ptr->doppler_alias / 5;  // 51 unknown
-    //ROS_ERROR("%f,%f,%f,%f",range,(float)(ptr->range_msb << 4),(float)(ptr->range_lsb),((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)));
+    //ROS_ERROR("%f,%f,%f,%f,%d,%d",doppler_vel,(float)(ptr->doppler_velocity_msb << 6)\
+        ,(float)(ptr->doppler_velocity_lsb),((float)(ptr->doppler_velocity_msb << 6)\
+         + (float)(ptr->doppler_velocity_lsb)) / 10 - 20,ptr->doppler_velocity_msb,ptr->doppler_velocity_lsb);
+    //ROS_ERROR("%f,%f,%f,%f,%d,%d",bearing,(float)(ptr->bearing_msb << 8)\
+        ,(float)(ptr->bearing_lsb),((float)(ptr->bearing_msb << 8)\
+         + (float)(ptr->bearing_lsb)) / 5,ptr->bearing_msb,ptr->bearing_lsb);
     // fill message and publish
     autoliv::RawPolarLong out;
     out.header.frame_id = "base_link";
@@ -364,9 +374,22 @@ void AutolivNode::procRawPolarLong(const dataspeed_can_msgs::CanMessageStamped::
 
 void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarLong *ptr = (const MsgTargetPolarLong*)msg->msg.data.elems;
-    float range = (float)(ptr->range_msb << 4 + ptr->range_lsb) / 20;  // 40.95 unknown
-    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;   // -71.2 unknown
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;            // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    float doppler_vel,bearing;
+    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 20;  // 40.95 unknown
+    float tmp = (float)(ptr->doppler_velocity_msb << 6) + (float)(ptr->doppler_velocity_lsb);   // -71.2 unknown
+    //if (ptr->ds==1)
+        doppler_vel=tmp / 10 - 20;
+    //else
+    //    doppler_vel=(tmp-512)/10-20;
+    tmp = (float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb);            // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    //if (ptr->bs==1)
+        bearing =tmp/5;
+    //else
+    //    bearing=(tmp-512)/5;
+    
+    ROS_ERROR("%f,%f,%f,%f,%d,%d",doppler_vel,(float)(ptr->doppler_velocity_msb << 6)\
+        ,(float)(ptr->doppler_velocity_lsb),((float)(ptr->doppler_velocity_msb << 6)\
+         + (float)(ptr->doppler_velocity_lsb)) / 10 - 20,ptr->doppler_velocity_msb,ptr->doppler_velocity_lsb);
     uint8_t quality = ptr->quality;   // 0 unobserved, 15 inconclusive
     uint8_t track_id = ptr->track_id; // 15 unknown
     uint8_t msg_counter = ptr->msg_counter;
@@ -379,7 +402,7 @@ void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStampe
     out.header.frame_id = "base_link";
     out.header.stamp = ros::Time::now();
     out.range = range;
-    out.velocity = velocity;
+    out.velocity = doppler_vel;
     out.bearing = bearing;
     out.quality = quality;
     out.track_id = track_id;
