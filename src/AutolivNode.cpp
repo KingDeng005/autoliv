@@ -7,7 +7,7 @@ namespace octopus
 int msg_counter_count=0;
 // this inline function is to transform uint16t data into int16_t
 int16_t inline uint2int(uint16_t data, int bit_num) {
-    num = (int16_t)(data << (16 - bit_num));
+    int16_t num = (int16_t)(data << (16 - bit_num));
     for(int i = 0; i < 16 - bit_num; ++i)
         num /= 2;
     return num;
@@ -161,6 +161,7 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
             default:
                 ROS_ERROR("undefined CAN id!");
                 break;
+        }
     }
 }
 
