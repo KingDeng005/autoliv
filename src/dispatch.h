@@ -162,12 +162,10 @@ typedef struct
   
   uint8_t doppler_velocity_msb : 4;
   uint8_t range_lsb : 4;
-  
   uint8_t bearing_msb : 2;
-  uint8_t ds:1;
+  //uint8_t ds:1;
   uint8_t doppler_velocity_lsb : 5;
-
-  uint8_t bs:1;
+  //uint8_t bs:1;
   uint8_t bearing_lsb : 7;
   uint8_t amplitude : 8;
   uint8_t sensor_nr : 4;
@@ -206,7 +204,7 @@ enum
   ID_COMMAND_SENSOR_3         = 0x203,
   ID_COMMAND_SENSOR_4         = 0x204,
   ID_TARGET_LOWER             = 0x300,
-  ID_TARGET_UPPER             = 0x309,
+  ID_TARGET_UPPER             = 0x37F,
   ID_MEAS_LOWER               = 0x380,
   ID_MEAS_UPPER               = 0x381,
   ID_ERR_MANAGEMENT           = 0X3FF,

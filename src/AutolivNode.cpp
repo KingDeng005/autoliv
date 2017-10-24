@@ -6,7 +6,12 @@ namespace octopus
 
 int msg_counter_count=0;
 // this inline function is to transform uint16t data into int16_t
-int16_t inline uint2int(uint16_t data, int bit_num) {return ((int16_t)(data<<(16-bit_num)))>>(16-bit_num);}
+int16_t inline uint2int(uint16_t data, int bit_num) {
+    num = (int16_t)(data << (16 - bit_num));
+    for(int i = 0; i < 16 - bit_num; ++i)
+        num /= 2;
+    return num;
+}
 
 // this inline function is to find the crc8 for sync message
 uint8_t inline crc8(MsgSyncMessage *ptr){
@@ -122,8 +127,8 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     // deal with target message for now
-    //if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER && getTargetType(msg)<=8 && getTargetType(msg)>0){
-    if(getTargetType(msg)<=8 && getTargetType(msg)>0){
+    if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER){
+        //if(getTargetType(msg)<=8 && getTargetType(msg)>0){
         ROS_ERROR("msg_type: %d",getTargetType(msg));
         const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
         ROS_ERROR("[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
@@ -156,15 +161,17 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
             default:
                 ROS_ERROR("undefined CAN id!");
                 break;
-        }
     }
 }
 
 void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarShort *ptr = (const MsgTargetPolarShort*)msg->msg.data.elems;
-    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown
-    float velocity = ((float)(ptr->velocity_msb << 6) + (float)(ptr->velocity_lsb)) / 10 - 20;  // -71.2 unknown
-    float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    float range = ((float)(ptr->range_msb << 4) + (float)ptr->range_lsb) / 100;   // 40.95 unknown
+    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;  // -71.2 unknown
+    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    //float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown
+    //float velocity = ((float)(ptr->velocity_msb << 6) + (float)(ptr->velocity_lsb)) / 10 - 20;  // -71.2 unknown
+    //float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
     uint8_t quality = ptr->quality;  // 0 unobserved, 15 inconclusive
     uint8_t track_id = ptr->track_id;  // 15 unknown 
     uint8_t msg_counter = ptr->msg_counter;  
@@ -192,9 +199,12 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
 
 void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarShort *ptr = (const MsgRawPolarShort*)msg->msg.data.elems;
-    float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown 
+    float range = ((float)(ptr->range_msb << 4) + (float)ptr->range_lsb) / 100;   // 40.95 unknown 
     float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
     float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
+    //float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown 
+    //float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
+    //float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
     float amp = (float)ptr->amplitude / 2; // 127.5 unknown
     uint8_t msg_counter = ptr->msg_counter;  
     uint8_t sensor_nr = ptr->sensor_nr;    // 0/5-15 undefined
