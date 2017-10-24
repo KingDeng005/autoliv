@@ -168,8 +168,8 @@ void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr 
 void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgTargetPolarShort *ptr = (const MsgTargetPolarShort*)msg->msg.data.elems;
     float range = ((float)(ptr->range_msb << 4) + (float)ptr->range_lsb) / 100;   // 40.95 unknown
-    float velocity = (float)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;  // -71.2 unknown
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
+    double velocity = (double)uint2int(ptr->velocity_msb << 6 + ptr->velocity_lsb, 10) / 10 - 20;  // -71.2 unknown
+    double bearing = (double)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
     //float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown
     //float velocity = ((float)(ptr->velocity_msb << 6) + (float)(ptr->velocity_lsb)) / 10 - 20;  // -71.2 unknown
     //float bearing = ((float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb)) / 5;  // -102.2 right unknown, 102.2 unknown, -102.4 unknown
@@ -201,8 +201,8 @@ void AutolivNode::procTargetPolarShort(const dataspeed_can_msgs::CanMessageStamp
 void AutolivNode::procRawPolarShort(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     const MsgRawPolarShort *ptr = (const MsgRawPolarShort*)msg->msg.data.elems;
     float range = ((float)(ptr->range_msb << 4) + (float)ptr->range_lsb) / 100;   // 40.95 unknown 
-    float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
-    float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
+    double doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
+    double bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
     //float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 100;   // 40.95 unknown 
     //float doppler_vel = (float)uint2int(ptr->doppler_velocity_msb << 6 + ptr->doppler_velocity_lsb, 10) / 10 - 20;  // -71.2 unknown 
     //float bearing = (float)uint2int(ptr->bearing_msb << 8 + ptr->bearing_lsb, 10) / 5; // -102.2 right unknown, 102.2 unknown, -102.4 unknown 
