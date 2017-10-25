@@ -15,8 +15,8 @@ typedef struct
   uint8_t : 8;
   uint8_t : 8;
   uint8_t : 8;
-  uint8_t : 4;
   uint8_t target_format_type : 4;
+  uint8_t : 4;
   uint8_t : 8;
 } MsgTargetGeneral;
 
@@ -159,19 +159,21 @@ typedef struct
 typedef struct
 {
   uint8_t range_msb;
-  
-  uint8_t doppler_velocity_msb : 4;
   uint8_t range_lsb : 4;
+  uint8_t doppler_velocity_msb : 4;
+  uint8_t doppler_velocity_lsb : 6;
   uint8_t bearing_msb : 2;
   //uint8_t ds:1;
-  uint8_t doppler_velocity_lsb : 5;
+  
   //uint8_t bs:1;
-  uint8_t bearing_lsb : 7;
+  uint8_t bearing_lsb : 8;
   uint8_t amplitude : 8;
-  uint8_t sensor_nr : 4;
+  
   uint8_t msg_counter : 4;
-  uint8_t usage : 4;
+  uint8_t sensor_nr : 4;
+  
   uint8_t target_format_type : 4;
+  uint8_t usage : 4;
   uint8_t doppler_alias : 8;
 } MsgRawPolarLong;
 
@@ -186,12 +188,17 @@ typedef struct
   uint8_t bearing_msb : 2;
   
   uint8_t bearing_lsb : 8;
-  uint8_t track_id : 4;
+  
   uint8_t quality : 4;
-  uint8_t sensor_nr : 4;
+  uint8_t track_id : 4;
+  
+
   uint8_t msg_counter : 4;
-  uint8_t obj_type : 4;
+  uint8_t sensor_nr : 4;
+  
   uint8_t target_format_type : 4;
+  uint8_t obj_type : 4;
+
   uint8_t : 8;
 } MsgTargetPolarLong;
 

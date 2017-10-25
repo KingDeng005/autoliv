@@ -44,7 +44,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
+    msg_timer = node.createTimer(ros::Duration(.04), &AutolivNode::publishMessageShortLongMode, this);
 }
 
 AutolivNode::~AutolivNode(){
@@ -92,7 +92,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
 }
 
 void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
-    for(int i = 4; i <= 4; ++i){
+    for(int i = 1; i <= 1; ++i){
         sendCommand(i, ptr);
     }
 }
@@ -127,7 +127,7 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     // deal with target message for now
-    if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER){
+    if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER && getTargetType(msg)<=8 && getTargetType(msg)>0){
         //if(getTargetType(msg)<=8 && getTargetType(msg)>0){
         ROS_ERROR("msg_type: %d",getTargetType(msg));
         const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
@@ -398,7 +398,7 @@ void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStampe
     //else
     //    bearing=(tmp-512)/5;
     
-    ROS_ERROR("%f,%f,%f,%f,%d,%d",doppler_vel,(float)(ptr->doppler_velocity_msb << 6)\
+    //ROS_ERROR("%f,%f,%f,%f,%d,%d",doppler_vel,(float)(ptr->doppler_velocity_msb << 6)\
         ,(float)(ptr->doppler_velocity_lsb),((float)(ptr->doppler_velocity_msb << 6)\
          + (float)(ptr->doppler_velocity_lsb)) / 10 - 20,ptr->doppler_velocity_msb,ptr->doppler_velocity_lsb);
     uint8_t quality = ptr->quality;   // 0 unobserved, 15 inconclusive
