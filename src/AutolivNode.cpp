@@ -44,7 +44,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     publishMessageReset();
     
     // initialize the timer
-    msg_timer = node.createTimer(ros::Duration(.04), &AutolivNode::publishMessageShortLongMode, this);
+    msg_timer = node.createTimer(ros::Duration(1), &AutolivNode::publishMessageShortLongMode, this);
 }
 
 AutolivNode::~AutolivNode(){
@@ -70,6 +70,7 @@ MsgSyncMessage* AutolivNode::sendSyncMessage(int mode){
     ptr->byte_2 = 0x00;
     ptr->byte_3 = 0x00;
     pub_can_.publish(out);
+    ROS_ERROR("Sync msg_counter: %d",ptr->msg_counter);
     return ptr; 
 }
 
@@ -89,6 +90,7 @@ void AutolivNode::sendCommand(int sensor_nr, MsgSyncMessage *sync_ptr){
     ptr->data_channel_2_lsb = 0;
     ptr->sync_msg_content = crc8(sync_ptr);
     pub_can_.publish(out);
+    ROS_ERROR("Command msg_counter: %d, sensor_nr: %d.",ptr->msg_counter, sensor_nr);
 }
 
 void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
@@ -99,24 +101,26 @@ void AutolivNode::sendCommandAll(MsgSyncMessage *ptr){
 
 void AutolivNode::publishMessageReset(){
     // send reset message 5 times
-    int cnt = 5; 
+    int reset_cnt = 1; 
     ros::Rate r(10);
-    while(ros::ok() && cnt--){
+    while(ros::ok() && reset_cnt--){
         MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_RESET);
         sendCommandAll(sync_msg);
         r.sleep();
     }
     // increment the counter
-    if(msg_counter_count++ > 15) msg_counter_count=0;
+    if(msg_counter_count++ > 15) msg_counter_count = 0;
     ROS_ERROR("FINISH SENDING THE RESET!");
 }
 
 // for timer trigger handler
 void AutolivNode::publishMessageShortLongMode(const ros::TimerEvent& e){
+    ros::Rate r(10);
     MsgSyncMessage* sync_msg = sendSyncMessage(MODE_SENSOR_LONG);
     sendCommandAll(sync_msg);
+    r.sleep();
     // increment the counter
-    if(msg_counter_count++ > 15) msg_counter_count=0;
+    if(msg_counter_count++ > 15) msg_counter_count = 0;
 }
 
 // this function is to get the target format type of a message
@@ -127,12 +131,23 @@ int AutolivNode::getTargetType(const dataspeed_can_msgs::CanMessageStamped::Cons
 
 void AutolivNode::recvCAN(const dataspeed_can_msgs::CanMessageStamped::ConstPtr &msg){
     // deal with target message for now
+    if(msg->msg.id == 0x3FF){
+        const MsgErrorMessage*ptr = (const MsgErrorMessage*)msg->msg.data.elems;
+        int e = ptr->error_msg;
+        int sensor_nr = ptr->sensor_nr;
+        int msg_counter = ptr->msg_counter;
+        ROS_ERROR("Error on message counter: %d, sensor number: %d, error type: %d.",msg_counter,sensor_nr,e);
+        //ROS_ERROR("[%X %X %X %X %X %X %X %X]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+    }
+    if(msg->msg.id == 0x400){
+        ROS_ERROR("[%X %X %X %X %X %X %X %X]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+    }
     if(msg->msg.id >= ID_TARGET_LOWER && msg->msg.id <= ID_TARGET_UPPER && getTargetType(msg)<=8 && getTargetType(msg)>0){
         //if(getTargetType(msg)<=8 && getTargetType(msg)>0){
-        ROS_ERROR("msg_type: %d",getTargetType(msg));
-        const MsgRawPolarLong *ptr = (const MsgRawPolarLong*)msg->msg.data.elems;
-        ROS_ERROR("[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
-        ROS_ERROR("msg_counter: %d",ptr->msg_counter);
+        //ROS_ERROR("msg_type: %d",getTargetType(msg));
+        const MsgTargetGeneral *ptr = (const MsgTargetGeneral*)msg->msg.data.elems;
+        //ROS_ERROR("[%d %d %d %d %d %d %d %d]",msg->msg.data.elems[0],msg->msg.data.elems[1],msg->msg.data.elems[2],msg->msg.data.elems[3],msg->msg.data.elems[4],msg->msg.data.elems[5],msg->msg.data.elems[6],msg->msg.data.elems[7]);
+        ROS_ERROR("msg_counter: %d, sensor_nr: %d.",ptr->msg_counter,ptr->sensor_nr);
         switch(getTargetType(msg)){
             case TYPE_TARGET_POLAR_SHORT:
                 procTargetPolarShort(msg);
