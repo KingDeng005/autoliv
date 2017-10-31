@@ -1,5 +1,6 @@
 #include "AutolivNode.h"
 #include <string>
+#include <math.h>
 
 namespace octopus
 {
@@ -35,6 +36,7 @@ AutolivNode::AutolivNode(ros::NodeHandle &node, ros::NodeHandle &priv_nh){
     pub_freespace_segments_ = node.advertise<autoliv::FreespaceSegments>("freespace_segments", 100);
     pub_raw_polar_long_ = node.advertise<autoliv::RawPolarLong>("raw_polar_long", 100);
     pub_target_polar_long_ = node.advertise<autoliv::TargetPolarLong>("target_polar_long", 100);
+    pub_target_cartesian_long_ = node.advertise<autoliv::TargetCartesianLong>("target_cartesian_long", 100);
     pub_can_ = node.advertise<dataspeed_can_msgs::CanMessage>("/can_tx", 100);
 
     // subscriber
@@ -404,8 +406,7 @@ void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStampe
     float range = ((float)(ptr->range_msb << 4) + (float)(ptr->range_lsb)) / 20;  // 40.95 unknown
     float tmp = (float)(ptr->doppler_velocity_msb << 6) + (float)(ptr->doppler_velocity_lsb);   // -71.2 unknown
     //if (ptr->ds==1)
-        doppler_vel=tmp / 10 - 20;
-    //else
+        doppler_vel=tmp / 10 - 20; //else
     //    doppler_vel=(tmp-512)/10-20;
     tmp = (float)(ptr->bearing_msb << 8) + (float)(ptr->bearing_lsb);            // -102.2 right unknown, 102.2 unknown, -102.4 unknown
     //if (ptr->bs==1)
@@ -424,19 +425,30 @@ void AutolivNode::procTargetPolarLong(const dataspeed_can_msgs::CanMessageStampe
     uint8_t obj_type = ptr->obj_type;     // 0 unknown
 
     // fill message and publish
-    autoliv::TargetPolarLong out;
-    out.header.frame_id = "base_link";
-    out.header.stamp = ros::Time::now();
-    out.range = range;
-    out.velocity = doppler_vel;
-    out.bearing = bearing;
-    out.quality = quality;
-    out.track_id = track_id;
-    out.msg_counter = msg_counter;
-    out.sensor_nr = sensor_nr;
-    out.target_format_type = type;
-    out.object_type = obj_type;
-    pub_target_polar_long_.publish(out);
+    autoliv::TargetPolarLong out_polar;
+    out_polar.header.frame_id = "base_link";
+    out_polar.header.stamp = ros::Time::now();
+    out_polar.range = range;
+    out_polar.velocity = doppler_vel;
+    out_polar.bearing = bearing;
+    out_polar.quality = quality;
+    out_polar.track_id = track_id;
+    out_polar.msg_counter = msg_counter;
+    out_polar.sensor_nr = sensor_nr;
+    out_polar.target_format_type = type;
+    out_polar.object_type = obj_type;
+    pub_target_polar_long_.publish(out_polar);
+
+    autoliv::TargetCartesianLong out_cat;
+    out_cat.header.frame_id = "base_link";
+    out_cat.header.stamp = ros::Time::now();
+    out_cat.distance_x = range * sin(bearing / 180 * 3.14159); 
+    out_cat.distance_y = range * cos(bearing / 180 * 3.14159);
+    out_cat.quality = quality;
+    out_cat.track_id = track_id;
+    out_cat.msg_counter = msg_counter;
+    out_cat.target_format_type = type;
+    out_cat.object_type = obj_type;
+    pub_target_cartesian_long_.publish(out_cat); 
 }
-    
 }

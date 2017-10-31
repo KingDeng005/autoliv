@@ -14,6 +14,7 @@
 #include <autoliv/TargetCartesianMul.h>
 #include <autoliv/TargetPolarLong.h>
 #include <autoliv/TargetPolarShort.h>
+#include <autoliv/TargetCartesianLong.h>
 
 namespace octopus{
 class AutolivNode{
@@ -57,6 +58,7 @@ private:
     ros::Publisher pub_freespace_segments_;
     ros::Publisher pub_raw_polar_long_;
     ros::Publisher pub_target_polar_long_;
+    ros::Publisher pub_target_cartesian_long_;
     ros::Publisher pub_can_;
 
 };

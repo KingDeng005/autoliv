@@ -28,6 +28,7 @@ add_message_files(
    TargetCartesianMid.msg
    TargetCartesianMul.msg
    FreespaceSegments.msg
+   TargetCartesianLong.msg
 )
 
 
